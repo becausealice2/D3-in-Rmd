@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="@becausealice2" />
+
+
+<title>Getting R and D3.js to play nicely in your .Rmd files</title>
+
+<script src="D3-in-Rmd_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="D3-in-Rmd_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="D3-in-Rmd_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="D3-in-Rmd_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="D3-in-Rmd_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="D3-in-Rmd_files/navigation-1.1/tabsets.js"></script>
+<link href="D3-in-Rmd_files/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="D3-in-Rmd_files/highlightjs-1.1/highlight.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Getting R and D3.js to play nicely in your .Rmd files</h1>
+<h4 class="author"><em><span class="citation">@becausealice2</span></em></h4>
+<h4 class="date"><em>December 7, 2016</em></h4>
+
+</div>
+
+
+<p>As there are already plenty of good resources made by people much better qualified to create them, this is not intended to be any kind of comprehensive tutorial on JavaScript, D3.js, R, or R markdown. Instead, it’s purpose is to show what experience has taught about working with all three in a single file.</p>
+<p>To keep this tutorial simple, let’s assume the data has been fully scienced and all that’s left is to create the D3 visualization(s). Have a look at the raw <code>cars</code> sample dataset that comes packaged with R</p>
+<pre class="r"><code>head(cars)</code></pre>
+<pre><code>##   speed dist
+## 1     4    2
+## 2     4   10
+## 3     7    4
+## 4     7   22
+## 5     8   16
+## 6     9   10</code></pre>
+<p>Passing data between languages is not as simple as referencing the name of the variable that contains them. If you try and add the JavaScript code <code>console.log(cars);</code> after the above R chunk, it will return a <code>ReferenceError</code> as <code>cars</code> has not yet been defined in JavaScript.</p>
+<p>You could write the data to a new file that you would then read back in with the appropriate loading method in D3. However, it is possible to pass the data directly to JavaScript inside the .Rmd file.</p>
+<pre class="r"><code>cat(
+  paste(
+  &#39;&lt;script&gt;
+    var data = &#39;,cars,&#39;;
+  &lt;/script&gt;&#39;
+  , sep=&quot;&quot;)
+)</code></pre>
+<pre><code>## &lt;script&gt;
+##     var data = c(4, 4, 7, 7, 8, 9, 10, 10, 10, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 16, 16, 17, 17, 17, 18, 18, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 22, 23, 24, 24, 24, 24, 25);
+##   &lt;/script&gt; &lt;script&gt;
+##     var data = c(2, 10, 4, 22, 16, 10, 18, 26, 34, 17, 28, 14, 20, 24, 28, 26, 34, 34, 46, 26, 36, 60, 80, 20, 26, 54, 32, 40, 32, 40, 50, 42, 56, 76, 84, 36, 46, 68, 32, 48, 52, 56, 64, 66, 54, 70, 92, 93, 120, 85);
+##   &lt;/script&gt;</code></pre>
+<p>The above code will, indeed, pass the data into our JavaScript space; however, we have created two new problems for ourselves:</p>
+<ul>
+<li>Each column in the data is being passed as an R vector, which JavaScript will interperet as being a call to some function <code>c()</code> with each of the values being passed as parameters.</li>
+<li>The columns were passed one-by-one to the JavaScript <code>data</code> variable, overwriting the values in the <code>speed</code> column with those in the <code>dist</code> column.</li>
+</ul>
+<p>To solve both problems at once, take advantage of D3’s assumption that the data it works with is in JSON format. R’s <code>jsonlite</code> library is lightweight with a simple <code>toJSON()</code> method that works perfectly for our purpose.</p>
+<pre class="r"><code>library(&quot;jsonlite&quot;)
+cat(
+  paste(
+  &#39;&lt;script&gt;
+    var data = &#39;,toJSON(cars),&#39;;
+  &lt;/script&gt;&#39;
+  , sep=&quot;&quot;)
+)</code></pre>
+<pre><code>## &lt;script&gt;
+##     var data = [{&quot;speed&quot;:4,&quot;dist&quot;:2},{&quot;speed&quot;:4,&quot;dist&quot;:10},{&quot;speed&quot;:7,&quot;dist&quot;:4},{&quot;speed&quot;:7,&quot;dist&quot;:22},{&quot;speed&quot;:8,&quot;dist&quot;:16},{&quot;speed&quot;:9,&quot;dist&quot;:10},{&quot;speed&quot;:10,&quot;dist&quot;:18},{&quot;speed&quot;:10,&quot;dist&quot;:26},{&quot;speed&quot;:10,&quot;dist&quot;:34},{&quot;speed&quot;:11,&quot;dist&quot;:17},{&quot;speed&quot;:11,&quot;dist&quot;:28},{&quot;speed&quot;:12,&quot;dist&quot;:14},{&quot;speed&quot;:12,&quot;dist&quot;:20},{&quot;speed&quot;:12,&quot;dist&quot;:24},{&quot;speed&quot;:12,&quot;dist&quot;:28},{&quot;speed&quot;:13,&quot;dist&quot;:26},{&quot;speed&quot;:13,&quot;dist&quot;:34},{&quot;speed&quot;:13,&quot;dist&quot;:34},{&quot;speed&quot;:13,&quot;dist&quot;:46},{&quot;speed&quot;:14,&quot;dist&quot;:26},{&quot;speed&quot;:14,&quot;dist&quot;:36},{&quot;speed&quot;:14,&quot;dist&quot;:60},{&quot;speed&quot;:14,&quot;dist&quot;:80},{&quot;speed&quot;:15,&quot;dist&quot;:20},{&quot;speed&quot;:15,&quot;dist&quot;:26},{&quot;speed&quot;:15,&quot;dist&quot;:54},{&quot;speed&quot;:16,&quot;dist&quot;:32},{&quot;speed&quot;:16,&quot;dist&quot;:40},{&quot;speed&quot;:17,&quot;dist&quot;:32},{&quot;speed&quot;:17,&quot;dist&quot;:40},{&quot;speed&quot;:17,&quot;dist&quot;:50},{&quot;speed&quot;:18,&quot;dist&quot;:42},{&quot;speed&quot;:18,&quot;dist&quot;:56},{&quot;speed&quot;:18,&quot;dist&quot;:76},{&quot;speed&quot;:18,&quot;dist&quot;:84},{&quot;speed&quot;:19,&quot;dist&quot;:36},{&quot;speed&quot;:19,&quot;dist&quot;:46},{&quot;speed&quot;:19,&quot;dist&quot;:68},{&quot;speed&quot;:20,&quot;dist&quot;:32},{&quot;speed&quot;:20,&quot;dist&quot;:48},{&quot;speed&quot;:20,&quot;dist&quot;:52},{&quot;speed&quot;:20,&quot;dist&quot;:56},{&quot;speed&quot;:20,&quot;dist&quot;:64},{&quot;speed&quot;:22,&quot;dist&quot;:66},{&quot;speed&quot;:23,&quot;dist&quot;:54},{&quot;speed&quot;:24,&quot;dist&quot;:70},{&quot;speed&quot;:24,&quot;dist&quot;:92},{&quot;speed&quot;:24,&quot;dist&quot;:93},{&quot;speed&quot;:24,&quot;dist&quot;:120},{&quot;speed&quot;:25,&quot;dist&quot;:85}];
+##   &lt;/script&gt;</code></pre>
+<script>
+    var data = [{"speed":4,"dist":2},{"speed":4,"dist":10},{"speed":7,"dist":4},{"speed":7,"dist":22},{"speed":8,"dist":16},{"speed":9,"dist":10},{"speed":10,"dist":18},{"speed":10,"dist":26},{"speed":10,"dist":34},{"speed":11,"dist":17},{"speed":11,"dist":28},{"speed":12,"dist":14},{"speed":12,"dist":20},{"speed":12,"dist":24},{"speed":12,"dist":28},{"speed":13,"dist":26},{"speed":13,"dist":34},{"speed":13,"dist":34},{"speed":13,"dist":46},{"speed":14,"dist":26},{"speed":14,"dist":36},{"speed":14,"dist":60},{"speed":14,"dist":80},{"speed":15,"dist":20},{"speed":15,"dist":26},{"speed":15,"dist":54},{"speed":16,"dist":32},{"speed":16,"dist":40},{"speed":17,"dist":32},{"speed":17,"dist":40},{"speed":17,"dist":50},{"speed":18,"dist":42},{"speed":18,"dist":56},{"speed":18,"dist":76},{"speed":18,"dist":84},{"speed":19,"dist":36},{"speed":19,"dist":46},{"speed":19,"dist":68},{"speed":20,"dist":32},{"speed":20,"dist":48},{"speed":20,"dist":52},{"speed":20,"dist":56},{"speed":20,"dist":64},{"speed":22,"dist":66},{"speed":23,"dist":54},{"speed":24,"dist":70},{"speed":24,"dist":92},{"speed":24,"dist":93},{"speed":24,"dist":120},{"speed":25,"dist":85}];
+  </script>
+<div id="you-have-to-include-the-resultsasis-option-in-the-curly-braces-at-the-top-of-the-code-chunk-to-pass-the-data-through" class="section level6">
+<h6><strong><em>**you have to include the results=“asis” option in the curly braces at the top of the code chunk to pass the data through**</em></strong></h6>
+<p>Now JavaScript has the data, and in a format it can work with. It’s time to start D3ing!</p>
+<p>There are two ways you can load the D3 library. Include <code>&lt;script src=&quot;https://d3js.org/d3.v4.min.js&quot;&gt;&lt;/script&gt;</code> directly in your markdown file at any point before your visualization. Or else create a .html file with only that same script tag in the same directory as your .Rmd file and <a href="http://rmarkdown.rstudio.com/html_document_format.html#includes">include it</a></p>
+<p>You’re now free to visualize with D3.js in R markdown until your hearts content:</p>
+<div id="plot">
+
+</div>
+<script>
+
+// set the dimensions and margins of the graph
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 900 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+// set the ranges
+var x = d3.scaleLinear().range([0, width]);
+var y = d3.scaleLinear().range([height, 0]);
+
+// append the svg obgect to the body of the page
+// appends a 'group' element to 'svg'
+// moves the 'group' element to the top left margin
+var svg = d3.select("#plot").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+
+// format the data
+data.forEach(function(d) {
+    d.speed = +d.speed;
+    d.dist  = +d.dist;
+});
+
+// Scale the range of the data
+x.domain(d3.extent(data, function(d) { return d.speed; }));
+y.domain([0, d3.max(data, function(d) { return d.dist; })]);
+
+// Add the scatterplot
+svg.selectAll("dot")
+    .data(data)
+  .enter().append("circle")
+    .attr("r", 5)
+    .attr("cx", function(d) { return x(d.speed); })
+    .attr("cy", function(d) { return y(d.dist); });
+
+// Add the X Axis
+svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+
+// Add the Y Axis
+svg.append("g")
+    .call(d3.axisLeft(y));
+
+</script>
+<p>I should add a word of caution. If you are the type to just copy/paste from <a href="https://bl.ocks.org" class="uri">https://bl.ocks.org</a>, there is no shame–I don’t personally know anyone who uses D3 who doesn’t do it–but you have to keep in mind their data is always read in from external sources via D3’s loading methods. You’ll have to delete those lines of code, and substitute in your data varible inside of D3’s <code>.data()</code> method. Also, be sure to go through the D3 code to update all data references to your column names.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
