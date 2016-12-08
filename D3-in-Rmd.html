@@ -124,8 +124,8 @@ $(document).ready(function () {
 </div>
 
 
-<p>As there are already plenty of good resources made by people much better qualified to create them, this is not intended to be any kind of comprehensive tutorial on JavaScript, D3.js, R, or R markdown. Instead, it’s purpose is to show what experience has taught about working with all three in a single file.</p>
-<p>To keep this tutorial simple, let’s assume the data has been fully scienced and all that’s left is to create the D3 visualization(s). Have a look at the raw <code>cars</code> sample dataset that comes packaged with R</p>
+<p>As there are already plenty of good resources made by people much better qualified to create them, this is not intended to be any kind of comprehensive tutorial on JavaScript, D3.js, R, or R markdown. Instead, its purpose is to show what experience has taught about working with all three in a single file.</p>
+<p>To keep this tutorial simple, let’s assume the data has been fully scienced and all that’s left is to create the D3 visualization(s). Have a look at raw <code>cars</code> sample data set that comes packaged with R</p>
 <pre class="r"><code>head(cars)</code></pre>
 <pre><code>##   speed dist
 ## 1     4    2
@@ -150,7 +150,7 @@ $(document).ready(function () {
 ##   &lt;/script&gt;</code></pre>
 <p>The above code will, indeed, pass the data into our JavaScript space; however, we have created two new problems for ourselves:</p>
 <ul>
-<li>Each column in the data is being passed as an R vector, which JavaScript will interperet as being a call to some function <code>c()</code> with each of the values being passed as parameters.</li>
+<li>Each column in the data is being passed as an R vector, which JavaScript will interpret as being a call to some function <code>c()</code> with each of the values being passed as parameters.</li>
 <li>The columns were passed one-by-one to the JavaScript <code>data</code> variable, overwriting the values in the <code>speed</code> column with those in the <code>dist</code> column.</li>
 </ul>
 <p>To solve both problems at once, take advantage of D3’s assumption that the data it works with is in JSON format. R’s <code>jsonlite</code> library is lightweight with a simple <code>toJSON()</code> method that works perfectly for our purpose.</p>
@@ -172,7 +172,7 @@ cat(
 <h6><strong><em>**you have to include the results=“asis” option in the curly braces at the top of the code chunk to pass the data through**</em></strong></h6>
 <p>Now JavaScript has the data, and in a format it can work with. It’s time to start D3ing!</p>
 <p>There are two ways you can load the D3 library. Include <code>&lt;script src=&quot;https://d3js.org/d3.v4.min.js&quot;&gt;&lt;/script&gt;</code> directly in your markdown file at any point before your visualization. Or else create a .html file with only that same script tag in the same directory as your .Rmd file and <a href="http://rmarkdown.rstudio.com/html_document_format.html#includes">include it</a></p>
-<p>You’re now free to visualize with D3.js in R markdown until your hearts content:</p>
+<p>You’re now free to visualize with D3.js in R markdown until your hearts content! Just add the code with a JavaScript code chunk, between script tags directly in the markdown, or in a separate file that you link to with a script tag.</p>
 <div id="plot">
 
 </div>
@@ -187,7 +187,7 @@ var margin = {top: 20, right: 20, bottom: 30, left: 50},
 var x = d3.scaleLinear().range([0, width]);
 var y = d3.scaleLinear().range([height, 0]);
 
-// append the svg obgect to the body of the page
+// append the svg object to the body of the page
 // appends a 'group' element to 'svg'
 // moves the 'group' element to the top left margin
 var svg = d3.select("#plot").append("svg")
@@ -226,7 +226,7 @@ svg.append("g")
     .call(d3.axisLeft(y));
 
 </script>
-<p>I should add a word of caution. If you are the type to just copy/paste from <a href="https://bl.ocks.org" class="uri">https://bl.ocks.org</a>, there is no shame–I don’t personally know anyone who uses D3 who doesn’t do it–but you have to keep in mind their data is always read in from external sources via D3’s loading methods. You’ll have to delete those lines of code, and substitute in your data varible inside of D3’s <code>.data()</code> method. Also, be sure to go through the D3 code to update all data references to your column names.</p>
+<p>I should add a word of caution. If you are the type to just copy/paste from <a href="https://bl.ocks.org" class="uri">https://bl.ocks.org</a>, there is no shame–I don’t personally know anyone who uses D3 who doesn’t do it–but you have to keep in mind their data is always read in from external sources via D3’s loading methods. You’ll have to delete those lines of code, and substitute in your data variable inside of D3’s <code>.data()</code> method. Also, be sure to go through the D3 code to update all data references to your column names.</p>
 </div>
 
 
