@@ -4,7 +4,7 @@ December 7, 2016
 
 
 
-As there are already plenty of good resources made by people much better qualified to create them, this is not intended to be any kind of comprehensive tutorial on JavaScript, D3.js, R, or R markdown. Instead, its purpose is to show what experience has taught about working with all three in a single file.
+As there are already plenty of good resources made by people much better qualified to create them, this is not intended to be any kind of comprehensive tutorial on JavaScript, D3.js, R, or R markdown. Instead, its purpose is to show what experience has taught about working with all of them in a single file.
 
 To keep this tutorial simple, let's assume the data has been fully scienced and all that's left is to create the D3 visualization(s). Have a look at raw `cars` sample data set that comes packaged with R
 
